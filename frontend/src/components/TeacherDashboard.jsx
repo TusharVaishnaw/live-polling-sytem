@@ -12,7 +12,15 @@ export default function TeacherDashboard({
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [showHistory, setShowHistory] = useState(false);
-
+  const [participants, setParticipants] = useState([]);
+  React.useEffect(() => {
+    if (currentPoll?._id) {
+      fetch(`/api/polls/${currentPoll._id}/participants`)
+        .then(res => res.json())
+        .then(data => setParticipants(data))
+        .catch(err => console.error(err));
+    }
+  }, [currentPoll]);
   const calculatePercentage = (votes, total) => {
     return total > 0 ? Math.round((votes / total) * 100) : 0;
   };
