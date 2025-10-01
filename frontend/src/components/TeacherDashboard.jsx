@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, History, Users, BarChart3 } from 'lucide-react';
 
 export default function TeacherDashboard({ 
   currentPoll, 
   pollHistory, 
+  participants = [],
   onCreatePoll, 
   onEndPoll 
 }) {
@@ -11,17 +12,6 @@ export default function TeacherDashboard({
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [showHistory, setShowHistory] = useState(false);
-  const [localParticipants, setLocalParticipants] = useState([]);
-
-  // Fetch participants whenever the current poll changes
-  useEffect(() => {
-    if (currentPoll?._id) {
-      fetch(`/api/polls/${currentPoll._id}/participants`)
-        .then(res => res.json())
-        .then(data => setLocalParticipants(data))
-        .catch(err => console.error(err));
-    }
-  }, [currentPoll]);
 
   const calculatePercentage = (votes, total) => {
     return total > 0 ? Math.round((votes / total) * 100) : 0;
@@ -230,13 +220,13 @@ export default function TeacherDashboard({
                 </div>
                 <div className="flex items-center gap-2 bg-purple-100 text-purple-600 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">{localParticipants.length}</span>
+                  <span className="text-sm font-medium">{participants.length}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                {localParticipants.length > 0 ? (
-                  localParticipants.map((participant, idx) => (
+                {participants.length > 0 ? (
+                  participants.map((participant, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm font-medium text-gray-700">{participant.name}</span>
                       {participant.voted && (
