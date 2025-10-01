@@ -34,6 +34,23 @@ router.get('/history', async (req, res) => {
   }
 });
 
+//get students participtaing
+// Get participants of a poll
+router.get('/:pollId/participants', async (req, res) => {
+  try {
+    const votes = await Vote.find({ pollId: req.params.pollId });
+    
+    const participants = votes.map(v => ({
+      name: v.userName,
+      voted: true
+    }));
+
+    res.json(participants);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Submit vote
 router.post('/vote', async (req, res) => {
   try {
