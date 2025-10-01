@@ -4,12 +4,9 @@ import WelcomeScreen from './components/WelcomeScreen';
 import GetNameScreen from './components/GetNameScreen';
 import StudentPolling from './components/StudentPolling';
 import TeacherDashboard from './components/TeacherDashboard';
+
 const API_URL = process.env.REACT_APP_API_URL;
-// const socket = io('http://localhost:5000');
-// const socket = io('https://live-poll-backend-zr65.onrender.com');
 const socket = io(API_URL);
-
-
 
 function App() {
   const [userType, setUserType] = useState(null);
@@ -19,6 +16,15 @@ function App() {
   const [pollHistory, setPollHistory] = useState([]);
   const [participants, setParticipants] = useState([]);
   const [hasVoted, setHasVoted] = useState(false);
+
+  // Fetch participants whenever currentPoll changes
+  useEffect(() => {
+    if (currentPoll?._id) {
+      fetchParticipants(currentPoll._id);
+    } else {
+      setParticipants([]);
+    }
+  }, [currentPoll]);
 
   useEffect(() => {
     // Fetch active poll on load
@@ -41,6 +47,9 @@ function App() {
               : opt
           )
         }));
+        
+        // Fetch updated participants when someone votes
+        fetchParticipants(data.pollId);
       }
     });
 
@@ -48,10 +57,22 @@ function App() {
       setPollHistory(prev => [poll, ...prev]);
       setCurrentPoll(null);
       setHasVoted(false);
+      setParticipants([]);
     });
 
     socket.on('participantJoined', (participant) => {
-      setParticipants(prev => [...prev, participant]);
+      setParticipants(prev => {
+        // Avoid duplicates
+        if (prev.find(p => p.name === participant.name)) {
+          return prev;
+        }
+        return [...prev, participant];
+      });
+    });
+
+    // New listener for participant updates
+    socket.on('participantsUpdate', (updatedParticipants) => {
+      setParticipants(updatedParticipants);
     });
 
     return () => {
@@ -59,12 +80,12 @@ function App() {
       socket.off('voteUpdate');
       socket.off('pollEnded');
       socket.off('participantJoined');
+      socket.off('participantsUpdate');
     };
   }, [currentPoll]);
 
   const fetchActivePoll = async () => {
     try {
-      // const response = await fetch('http://localhost:5000/api/polls/active');
       const response = await fetch(`${API_URL}/api/polls/active`);
       const data = await response.json();
       if (data) setCurrentPoll(data);
@@ -75,12 +96,21 @@ function App() {
 
   const fetchPollHistory = async () => {
     try {
-      // const response = await fetch('http://localhost:5000/api/polls/history');
       const response = await fetch(`${API_URL}/api/polls/history`);
       const data = await response.json();
       setPollHistory(data);
     } catch (error) {
       console.error('Error fetching poll history:', error);
+    }
+  };
+
+  const fetchParticipants = async (pollId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/polls/${pollId}/participants`);
+      const data = await response.json();
+      setParticipants(data);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
     }
   };
 
@@ -109,6 +139,7 @@ function App() {
       const poll = await response.json();
       socket.emit('createPoll', poll);
       setCurrentPoll(poll);
+      setParticipants([]); // Reset participants for new poll
     } catch (error) {
       console.error('Error creating poll:', error);
     }
@@ -129,7 +160,7 @@ function App() {
       });
 
       if (response.ok) {
-        socket.emit('vote', { pollId: currentPoll._id, optionId });
+        socket.emit('vote', { pollId: currentPoll._id, optionId, userName });
         setHasVoted(true);
       } else {
         const error = await response.json();
@@ -151,6 +182,7 @@ function App() {
       socket.emit('endPoll', endedPoll);
       setPollHistory([endedPoll, ...pollHistory]);
       setCurrentPoll(null);
+      setParticipants([]);
     } catch (error) {
       console.error('Error ending poll:', error);
     }
