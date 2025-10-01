@@ -9,8 +9,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
+    methods: ["GET", "POST", "PATCH"]
   }
 });
 
@@ -23,6 +23,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/polling-s
   useUnifiedTopology: true
 });
 
+// Make io accessible to routes
+app.set('io', io);
+
 // Routes
 app.use('/api/polls', require('./routes/polls'));
 
@@ -34,12 +37,29 @@ io.on('connection', (socket) => {
     io.emit('pollUpdate', poll);
   });
 
-  socket.on('vote', (data) => {
+  socket.on('vote', async (data) => {
     io.emit('voteUpdate', data);
+    
+    // Fetch and emit updated participants
+    try {
+      const Vote = require('./models/Vote');
+      const votes = await Vote.find({ pollId: data.pollId });
+      const participants = votes.map(v => ({
+        name: v.userName,
+        voted: true
+      }));
+      io.emit('participantsUpdate', participants);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+    }
   });
 
   socket.on('endPoll', (poll) => {
     io.emit('pollEnded', poll);
+  });
+
+  socket.on('userJoined', (user) => {
+    socket.emit('participantJoined', user);
   });
 
   socket.on('disconnect', () => {
