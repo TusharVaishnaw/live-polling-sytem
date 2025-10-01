@@ -4,8 +4,12 @@ import WelcomeScreen from './components/WelcomeScreen';
 import GetNameScreen from './components/GetNameScreen';
 import StudentPolling from './components/StudentPolling';
 import TeacherDashboard from './components/TeacherDashboard';
+const API_URL = process.env.REACT_APP_API_URL;
+// const socket = io('http://localhost:5000');
+// const socket = io('https://live-poll-backend-zr65.onrender.com');
+const socket = io(API_URL);
 
-const socket = io('http://localhost:5000');
+
 
 function App() {
   const [userType, setUserType] = useState(null);
@@ -60,7 +64,8 @@ function App() {
 
   const fetchActivePoll = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/polls/active');
+      // const response = await fetch('http://localhost:5000/api/polls/active');
+      const response = await fetch(`${API_URL}/api/polls/active`);
       const data = await response.json();
       if (data) setCurrentPoll(data);
     } catch (error) {
@@ -70,7 +75,8 @@ function App() {
 
   const fetchPollHistory = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/polls/history');
+      // const response = await fetch('http://localhost:5000/api/polls/history');
+      const response = await fetch(`${API_URL}/api/polls/history`);
       const data = await response.json();
       setPollHistory(data);
     } catch (error) {
@@ -92,7 +98,7 @@ function App() {
 
   const handleCreatePoll = async (pollData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/polls', {
+      const response = await fetch(`${API_URL}/api/polls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,7 +118,7 @@ function App() {
     if (hasVoted || !currentPoll) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/polls/vote', {
+      const response = await fetch(`${API_URL}/api/polls/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -138,7 +144,7 @@ function App() {
     if (!currentPoll) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/polls/${currentPoll._id}/end`, {
+      const response = await fetch(`${API_URL}/api/polls/${currentPoll._id}/end`, {
         method: 'PATCH'
       });
       const endedPoll = await response.json();
