@@ -38,10 +38,10 @@ This project is a full-stack application leveraging the following technologies:
 
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | JavaScript (with a framework like React or Vue) | Building the user interface for both Teacher and Student dashboards. |
+| **Frontend** | React.js | Building the user interface for both Teacher and Student dashboards. |
 | **Backend** | Node.js / Express | Server-side logic, API handling, and serving real-time updates. |
-| **Real-time** | **Socket.IO / WebSockets** | Enabling instant, bi-directional communication for live polling and result updates. |
-| **Database** | MongoDB / PostgreSQL (Inferred) | Storing poll questions, options, session data, and poll history. |
+| **Real-time** | Socket.IO  | Enabling instant, bi-directional communication for live polling and result updates. |
+| **Database** | MongoDB | Storing poll questions, options, session data, and poll history. |
 
 -----
 
@@ -52,7 +52,7 @@ Follow these steps to set up the project locally.
 ### Prerequisites
 
   * **Node.js** (v14+)
-  * **npm** or **yarn**
+  * **npm** 
   * A running instance of your chosen database (e.g., MongoDB)
 
 ### 1\. Clone the repository
@@ -69,7 +69,7 @@ The project structure suggests a separate `backend` folder.
 ```bash
 cd backend
 npm install
-# Create a .env file and add your database and port configurations
+# Create a .env file and add your database and port configurations in backend
 # Example: DB_URI=your_database_connection_string
 # Example: PORT=5000
 npm start
@@ -92,3 +92,13 @@ npm start
 The frontend application should now be running (typically at `http://localhost:3000`).
 
 Open your browser and navigate to the local frontend address to start using the **Live Polling System**.
+
+## Thank you for checking out the Live Polling System! Happy coding! 🎉
+
+
+
+
+
+
+
+
