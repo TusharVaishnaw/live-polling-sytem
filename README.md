@@ -93,12 +93,4 @@ The frontend application should now be running (typically at `http://localhost:3
 
 Open your browser and navigate to the local frontend address to start using the **Live Polling System**.
 
-## Thank you for checking out the Live Polling System! Happy coding! 🎉
-
-
-
-
-
-
-
-
+## Thank you for checking out the Live Polling System! Time to create some live polls! 🎯
